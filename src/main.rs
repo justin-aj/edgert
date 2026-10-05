@@ -1,48 +1,69 @@
-// Lesson 2, step 2: enum.
-// An enum value is exactly ONE of its variants.
+// Lesson 4: impl on enums.
+// Same idea as struct: impl attaches functions. Inside, use `match self`.
 
-use std::mem::size_of;
-
-// Part A: plain enum. Variants carry no data.
-enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
+enum Shape {
+    Circle(f64),
+    Rect(f64, f64),
 }
 
-fn name(d: Direction) -> &'static str {
-    match d {
-        Direction::Up => "up",
-        Direction::Down => "down",
-        Direction::Left => "left",
-        Direction::Right => "right",
+impl Shape {
+    // &self: read only. match on self to see which variant it is.
+    fn area(&self) -> f64 {
+        match self {
+            Shape::Circle(r) => 3.14 * r * r,
+            Shape::Rect(w, h) => w * h,
+        }
+    }
+
+    fn name(&self) -> &str {
+        match self {
+            Shape::Circle(_) => "circle", // _ = ignore the data
+            Shape::Rect(_, _) => "rect",
+        }
     }
 }
 
-// Part B: variants carry data. Each variant can hold different data.
-enum Shape {
-    Circle(f64),      // radius
-    Rect(f64, f64),   // width, height
+enum Light {
+    Red,
+    Green,
+    Yellow,
 }
 
-fn area(s: Shape) -> f64 {
-    match s {
-        Shape::Circle(r) => 3.14 * r * r,
-        Shape::Rect(w, h) => w * h,
+impl Light {
+    // &mut self: change which variant the value is.
+    fn next(&mut self) {
+        *self = match self {
+            Light::Red => Light::Green,
+            Light::Green => Light::Yellow,
+            Light::Yellow => Light::Red,
+        };
+    }
+
+    fn show(&self) {
+        match self {
+            Light::Red => println!("red"),
+            Light::Green => println!("green"),
+            Light::Yellow => println!("yellow"),
+        }
     }
 }
 
 fn main() {
-    println!("{}", name(Direction::Up));
-    println!("{}", name(Direction::Left));
+    let c = Shape::Circle(2.0);
+    let r = Shape::Rect(3.0, 4.0);
+    println!("{} area = {}", c.name(), c.area());
+    println!("{} area = {}", r.name(), r.area());
 
-    println!("circle area = {}", area(Shape::Circle(2.0)));
-    println!("rect area   = {}", area(Shape::Rect(3.0, 4.0)));
+    let mut light = Light::Red;
+    light.show();
+    light.next();
+    light.show();
+    light.next();
+    light.show();
+    light.next();
+    light.show();
 
-    println!("size Direction = {}", size_of::<Direction>());
-    println!("size Shape     = {}", size_of::<Shape>());
-
-    // TODO 1: delete the `Direction::Down` line in `name`. Run. Read the error.
-    // TODO 2: guess size Direction and size Shape before you run. Then check.
+    // TODO 1: in `Shape::area`, delete the `Shape::Rect` arm. Read the error.
+    // TODO 2: add a variant `Triangle(f64, f64)` to Shape. Run. Read the errors.
+    //         Fix both `match` blocks. Compiler lists every place to update.
 }
